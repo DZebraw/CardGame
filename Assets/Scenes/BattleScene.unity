@@ -652,7 +652,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b63c523d925076b45a39bda1be5f1682, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BattleManager: {fileID: 1777266534}
   PhaseText: {fileID: 676208248}
 --- !u!1 &676208246
 GameObject:
@@ -704,7 +703,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+  m_Color: {r: 0.509434, g: 0.509434, b: 0.509434, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -724,7 +723,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: New Text
+  m_Text: PlayerDraw
 --- !u!222 &676208249
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1501,7 +1500,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerData: {fileID: 1960651984}
   enemyData: {fileID: 1534642571}
-  cardPrefab: {fileID: 8944484297836036635, guid: b498720cb5c27a048931d10837d4b338, type: 3}
+  cardPrefab: {fileID: 8944484297836036635, guid: c3aad586efc30094d807d6cc9fc5ac7c, type: 3}
   playerHand: {fileID: 2026009987}
   enemyHand: {fileID: 679767570}
   playerBlocks:
@@ -1515,6 +1514,10 @@ MonoBehaviour:
   playerIcon: {fileID: 920263958}
   enemyIcon: {fileID: 0}
   GamePhase: 0
+  phaseChangeEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  summonCountMax: 0200000002000000
 --- !u!4 &1777266535
 Transform:
   m_ObjectHideFlags: 0
