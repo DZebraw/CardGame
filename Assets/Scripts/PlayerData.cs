@@ -55,10 +55,11 @@ public class PlayerData : MonoBehaviour
 
     public void SavePlayerData()
     {
-        string path = Application.dataPath + "/Datas/playerData.CSV";
+        string path = Application.dataPath + "/Datas/playerData.csv";
         
         List<string> datas = new List<string>();
         datas.Add("coins," + playerCoins.ToString());
+        //保存所拥有的卡
         for (int i = 0; i < playerCards.Length; i++)
         {
             //如果对应卡牌数量不为0,添加卡牌信息 

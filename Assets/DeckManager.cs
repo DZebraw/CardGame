@@ -16,10 +16,16 @@ public class DeckManager : MonoBehaviour
     private Dictionary<int, GameObject> libraryDic = new Dictionary<int, GameObject>();
     private Dictionary<int, GameObject> deckDic = new Dictionary<int, GameObject>();
     
-    private void Start()
+    private IEnumerator Start()
     {
+        // 获取组件引用
         playerData = dataManager.GetComponent<PlayerData>();
         cardStore = dataManager.GetComponent<CardStore>();
+    
+        // 等待一帧确保其他组件的Start方法已执行
+        yield return null;
+    
+        // 现在可以安全地更新UI
         UpdateLibrary();
         UpdateDeck();
     }
