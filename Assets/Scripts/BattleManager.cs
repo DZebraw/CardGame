@@ -2,7 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using Random = UnityEngine.Random;
+using UnityEngine.EventSystems;
 
 public enum GamePhase
 {
@@ -13,8 +15,10 @@ public enum GamePhase
     enemyAction
 }
 
-public class BattleManager : MonoBehaviour
+public class BattleManager : MonoSingleton<BattleManager>
 {
+    public static BattleManager Instance;
+    
     public PlayerData playerData;
     public PlayerData enemyData;//数据
 
@@ -34,9 +38,12 @@ public class BattleManager : MonoBehaviour
 
     public GamePhase GamePhase = GamePhase.gameStart;
 
-    //游戏流程
-    //开始游戏：加载数据，卡组洗牌，初始手牌
-    //回合结束，游戏阶段
+    public UnityEvent phaseChangeEvent = new UnityEvent();//每当回合发生变化则触发
+
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     private void Start()
     {
@@ -119,6 +126,7 @@ public class BattleManager : MonoBehaviour
         {
             DrawCard(0,1);
             GamePhase = GamePhase.playerAction;
+            phaseChangeEvent.Invoke();
         }
     }
     public void OnEnemyDraw()
@@ -166,10 +174,12 @@ public class BattleManager : MonoBehaviour
         if (GamePhase == GamePhase.playerAction)
         {
             GamePhase = GamePhase.enemyDraw;
+            phaseChangeEvent.Invoke();
         }
         else if (GamePhase == GamePhase.enemyAction)
         {
             GamePhase = GamePhase.playerDraw;
+            phaseChangeEvent.Invoke();
         }
     }
 }
