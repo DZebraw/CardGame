@@ -8,7 +8,8 @@ public class PlayerData : MonoBehaviour
 {
     public CardStore cardStore;
     public int playerCoins;
-    public int[] playerCards;
+    public int[] playerCards;//玩家仓库卡
+    public int[] playerDeck;//玩家卡组卡
     public TextAsset playerData;
 
     private void Start()
@@ -21,6 +22,7 @@ public class PlayerData : MonoBehaviour
     {
         //根据已有卡牌固定数组长度
         playerCards = new int[cardStore.cardList.Count];
+        playerDeck = new int[cardStore.cardList.Count];
         
         string[] dataRow = playerData.text.Split('\n');
         foreach (var row in dataRow)
@@ -41,6 +43,13 @@ public class PlayerData : MonoBehaviour
                 //载入玩家数据
                 playerCards[id] = num;
             }
+            else if (rowArray[0] == "deck")
+            {
+                int id = int.Parse(rowArray[1]);
+                int num = int.Parse(rowArray[2]);
+                //载入卡组
+                playerDeck[id] = num;
+            }
         }
     }
 
@@ -59,6 +68,13 @@ public class PlayerData : MonoBehaviour
             }
         }
         //保存卡组
+        for (int i = 0; i < playerDeck.Length; i++)
+        {
+            if (playerDeck[i] != 0)
+            {
+                datas.Add("deck," + i.ToString() + "," + playerDeck[i].ToString());
+            }
+        }
         
         //保存数据
         File.WriteAllLines(path, datas);
