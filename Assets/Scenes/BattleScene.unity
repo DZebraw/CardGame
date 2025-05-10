@@ -1518,6 +1518,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   summonCountMax: 0200000002000000
+  arrowPrefab: {fileID: 2899989090973967769, guid: 91453aeb1c7ad6443860978251bca305, type: 3}
 --- !u!4 &1777266535
 Transform:
   m_ObjectHideFlags: 0

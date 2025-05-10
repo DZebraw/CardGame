@@ -44,6 +44,9 @@ public class BattleManager : MonoSingleton<BattleManager>
     private int[] summonCounter = new int[2];//召唤次数
     private GameObject waitingMonster;
     private int waitingPlayer;
+
+    public GameObject arrowPrefab;
+    private GameObject arrow;
     
     private void Awake()
     {
@@ -53,6 +56,16 @@ public class BattleManager : MonoSingleton<BattleManager>
     private void Start()
     {
         GameStart();
+    }
+
+    private void Update()
+    {
+        if (Input.GetMouseButton(1))
+        {
+            waitingMonster = null;
+            DestroyArrow();
+            CloseBlock();
+        }
     }
 
     public void GameStart()
@@ -66,15 +79,14 @@ public class BattleManager : MonoSingleton<BattleManager>
         DrawCard(0,3);
         DrawCard(1,3);
 
-        GamePhase = GamePhase.playerDraw;
+        NextPhase();
         
         summonCounter = summonCountMax;
     }
 
-    //读取数据
+    //读取数据，加载玩家卡组于playerDeckList、enemyDeckList
     public void ReadDeck()
     {
-        //加载玩家卡组
         for (int i = 0; i < playerData.playerDeck.Length; i++)
         {
             if (playerData.playerDeck[i] != 0)
@@ -107,6 +119,7 @@ public class BattleManager : MonoSingleton<BattleManager>
     public void ShuffletDeck(int _player)//0:player,1:enemy
     {
         List<Card> shuffletDeck = new List<Card>();
+        
         if (_player == 0)
         {
             shuffletDeck = playerDeckList;
@@ -126,14 +139,13 @@ public class BattleManager : MonoSingleton<BattleManager>
         }
     }
 
-    //玩家抽牌和敌人抽牌由抽牌按钮调用
+    //玩家抽牌和敌人抽牌由抽牌 按钮调用
     public void OnPlayerDraw()
     {
         if (GamePhase == GamePhase.playerDraw)
         {
             DrawCard(0,1);
-            GamePhase = GamePhase.playerAction;
-            phaseChangeEvent.Invoke();
+            NextPhase();
         }
     }
     public void OnEnemyDraw()
@@ -141,8 +153,7 @@ public class BattleManager : MonoSingleton<BattleManager>
         if (GamePhase == GamePhase.enemyDraw)
         {
             DrawCard(1,1);
-            GamePhase = GamePhase.enemyAction;
-            phaseChangeEvent.Invoke();
+            NextPhase();
         }
     }
 
@@ -180,30 +191,46 @@ public class BattleManager : MonoSingleton<BattleManager>
     
     public void TurnEnd()
     {
-        if (GamePhase == GamePhase.playerAction)
+        if (GamePhase == GamePhase.playerAction || GamePhase == GamePhase.enemyAction)
         {
-            GamePhase = GamePhase.enemyDraw;
-            phaseChangeEvent.Invoke();
-        }
-        else if (GamePhase == GamePhase.enemyAction)
-        {
-            GamePhase = GamePhase.playerDraw;
-            phaseChangeEvent.Invoke();
+            NextPhase();
         }
     }
 
-    //请求者，被召唤的随从
+    public void NextPhase()
+    {
+        //如果到了最后一个enemyaction，则回到第二个playerdraw，而不是第一个：gamestart
+        if ((int)GamePhase == System.Enum.GetNames(GamePhase.GetType()).Length - 1)
+        {
+            GamePhase = GamePhase.playerDraw;
+        }
+        else
+        {
+            GamePhase += 1;
+        }
+        phaseChangeEvent.Invoke();
+    }
+
+    /// <summary>
+    /// 发出召唤请求
+    /// </summary>
+    /// <param name="_player">玩家编号</param>
+    /// <param name="_monster">怪兽卡</param>
     public void SummonRequst(int _player,GameObject _monster)
     {
         GameObject[] blocks;
         bool hasEmptyBlock = false;
-        if (_player == 0)
+        if (_player == 0 && GamePhase == GamePhase.playerAction)
         {
             blocks = playerBlocks;
         }
-        else
+        else if(_player == 1 && GamePhase == GamePhase.enemyAction)
         {
             blocks = enemyBlocks;
+        }
+        else
+        {
+            return;
         }
         
         if (summonCounter[_player] > 0)
@@ -223,12 +250,19 @@ public class BattleManager : MonoSingleton<BattleManager>
         {
             waitingMonster = _monster;
             waitingPlayer = _player;
+            CreateArrow(_monster.transform,arrowPrefab);
         }
     }
 
+    /// <summary>
+    /// 召唤确认 
+    /// </summary>
+    /// <param name="_block"></param>
     public void SummonConfirm(Transform _block)
     {
         Summon(waitingPlayer,waitingMonster,_block);
+        CloseBlock();
+        DestroyArrow();
     }
 
     public void Summon(int _player, GameObject _monster ,Transform _block)
@@ -238,5 +272,33 @@ public class BattleManager : MonoSingleton<BattleManager>
         _monster.GetComponent<BattleCard>().state = BattleCardState.inBlock;
         _block.GetComponent<Block>().card = _monster;
         summonCounter[_player]--;
+    }
+
+    public void CreateArrow(Transform _startPoint,GameObject _prefab)
+    {
+        DestroyArrow();
+        arrow = Instantiate(_prefab,GameObject.Find("Canvas").transform);
+        arrow.GetComponent<Arrow>().SetStartPoint(new Vector2(_startPoint.position.x,_startPoint.position.y));
+    }
+    public void DestroyArrow()
+    {
+        Destroy(arrow);
+    }
+
+    public void CloseBlock()
+    {
+        GameObject[] blocks;
+        if (waitingPlayer == 0)
+        {
+            blocks = playerBlocks;
+        }
+        else
+        {
+            blocks = enemyBlocks;
+        }
+        foreach (var block in blocks)
+        {
+            block.GetComponent<Block>().summonBlock.SetActive(false);//关闭高亮显示
+        }
     }
 }
